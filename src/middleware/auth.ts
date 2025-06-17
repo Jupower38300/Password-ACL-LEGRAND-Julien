@@ -2,6 +2,13 @@ import { verifyAccessToken } from '../services/JWT.js';
 import { createMiddleware } from 'hono/factory';
 
 import { users } from '../fake/data.js';
+import type { User } from '../models/User.js';
+
+declare module 'hono' {
+  interface ContextBindings {
+    user: User & { id: string };
+  }
+}
 
 export const authMiddleware = createMiddleware(async (c, next) => {
   try {
@@ -24,11 +31,12 @@ export const authMiddleware = createMiddleware(async (c, next) => {
     // Stocker les informations de l'utilisateur dans le contexte
     c.set('user', {
       ...user,
-      id: decoded.userId
+      id: decoded.userId,
     });
 
     await next();
   } catch (error) {
+    console.log(error);
     return c.json({ error: 'Token invalide ou expiré' }, 401);
   }
-});  
+});

@@ -1,33 +1,50 @@
-import { zValidator } from "@hono/zod-validator";
-import { Hono } from "hono";
-import { getUser, LoginSchema, setUser, userExist, UserSchema } from "../models/User.js";
-import { hashPassword, verifyPassword } from "../services/hashing.js";
-import { generateTokens, verifyRefreshToken } from "../services/JWT.js";
-import { z } from "zod";
-import { createRefreshToken, deleteRefreshToken, existsRefreshToken, TokenSchema, updateRefreshToken } from "../models/Token.js";
-import { authMiddleware } from "../middleware/auth.js";
+import { zValidator } from '@hono/zod-validator';
+import { Hono } from 'hono';
+import {
+  getUser,
+  LoginSchema,
+  setUser,
+  userExist,
+  UserSchema,
+} from '../models/User.js';
+import { hashPassword, verifyPassword } from '../services/hashing.js';
+import { generateTokens, verifyRefreshToken } from '../services/JWT.js';
+import { z } from 'zod';
+import {
+  createRefreshToken,
+  deleteRefreshToken,
+  existsRefreshToken,
+  TokenSchema,
+  updateRefreshToken,
+} from '../models/Token.js';
+import { authMiddleware } from '../middleware/auth.js';
 
 const route = new Hono();
 
 route.post('/register', zValidator('json', UserSchema), async (c) => {
   try {
-    const validatedUser = c.req.valid("json");
+    const validatedUser = c.req.valid('json');
 
     // Vérifier si l'utilisateur existe déjà
     if (userExist(validatedUser.username)) {
-      return c.json({
-        error: "Nom d'utilisateur déjà pris"
-      }, 400)
+      return c.json(
+        {
+          error: "Nom d'utilisateur déjà pris",
+        },
+        400
+      );
     }
 
-    const { password: hashedPassword, salt } = await hashPassword(validatedUser.password);
+    const { password: hashedPassword, salt } = await hashPassword(
+      validatedUser.password
+    );
     const userId = crypto.randomUUID(); // Générer un ID unique
 
     const user = {
       id: userId,
       ...validatedUser,
       password: hashedPassword,
-      salt
+      salt,
     };
 
     setUser(user);
@@ -36,16 +53,19 @@ route.post('/register', zValidator('json', UserSchema), async (c) => {
     const tokens = generateTokens({
       userId,
       username: user.username,
-      role: user.role
+      role: user.role,
     });
 
     // Stocker le refresh token
     createRefreshToken(tokens.refreshToken);
 
-    return c.json({
-      message: 'Utilisateur créé avec succès',
-      ...tokens
-    }, 201);
+    return c.json(
+      {
+        message: 'Utilisateur créé avec succès',
+        ...tokens,
+      },
+      201
+    );
   } catch (error) {
     if (error instanceof z.ZodError) {
       return c.json({ error: error.errors }, 400);
@@ -54,9 +74,9 @@ route.post('/register', zValidator('json', UserSchema), async (c) => {
   }
 });
 
-route.post('/login', zValidator("json", LoginSchema), async (c) => {
+route.post('/login', zValidator('json', LoginSchema), async (c) => {
   try {
-    const validatedCredentials = c.req.valid("json");
+    const validatedCredentials = c.req.valid('json');
 
     const user = getUser(validatedCredentials.username);
     if (!user) {
@@ -77,7 +97,7 @@ route.post('/login', zValidator("json", LoginSchema), async (c) => {
     const tokens = generateTokens({
       userId: user.id,
       username: user.username,
-      role: user.role
+      role: user.role,
     });
 
     // Stocker le nouveau refresh token
@@ -92,9 +112,9 @@ route.post('/login', zValidator("json", LoginSchema), async (c) => {
   }
 });
 
-route.post('/refresh-token', zValidator("json", TokenSchema), async (c) => {
+route.post('/refresh-token', zValidator('json', TokenSchema), async (c) => {
   try {
-    const { refreshToken } = c.req.valid("json");
+    const { refreshToken } = c.req.valid('json');
 
     // Vérifier si le refresh token existe
     if (!existsRefreshToken(refreshToken)) {
@@ -108,7 +128,7 @@ route.post('/refresh-token', zValidator("json", TokenSchema), async (c) => {
     const tokens = generateTokens({
       userId: decoded.userId,
       username: decoded.username,
-      role: decoded.role
+      role: decoded.role,
     });
 
     // Supprimer l'ancien refresh token et stocker le nouveau
@@ -133,6 +153,5 @@ route.post('/logout', authMiddleware, async (c) => {
     return c.json({ error: 'Erreur lors de la déconnexion' }, 500);
   }
 });
-
 
 export default route;
