@@ -1,9 +1,13 @@
 # Exercice : Système d'authentification sécurisé avec Hono
 
+## Réalisé par LEGRAND Julien
+
 ## Objectif
+
 Créer une API REST sécurisée permettant la gestion des utilisateurs et des autorisations avec les technologies modernes.
 
 ## Technologies requises
+
 - Framework Hono (TypeScript)
 - Zod pour la validation des données
 - Argon2 pour le hachage des mots de passe
@@ -11,6 +15,7 @@ Créer une API REST sécurisée permettant la gestion des utilisateurs et des au
 - JWT pour l'authentification
 
 ## Informations importante
+
 La base du projet a déjà été codée pour vous, vous allez devoir vous concentrer sur ce qu'il manque pour que le projet fonctionne.
 Vous êtes libres de créer des fichiers et de vous organiser comme vous le souhaitez, le tout est de répondre aux exigences.
 
@@ -26,29 +31,35 @@ n'oubliez pas de créer un .env sur la base de exemple.env pour que votre applic
 ## Fonctionnalités à implémenter
 
 ### 1. Gestion des utilisateurs
+
 - Inscription (register)
 - Connexion (login)
 - Déconnexion (logout)
 - Gestion des tokens (refresh)
 
 ### 2. Sécurité
+
 - Validation des données entrantes avec Zod
 - Hachage sécurisé des mots de passe avec Argon2
 - Système de double token (access + refresh)
 - Protection contre les attaques courantes
 
 ### 3. Contrôle d'accès
+
 - Implémentation de rôles (admin, user, guest)
 - Gestion fine des permissions avec AccessControl
 - Middleware de vérification des permissions
 - Gestion des ressources personnelles (own) et globales
 
 ## Contraintes techniques
+
 1. Les mots de passe doivent :
+
    - Avoir au moins 8 caractères
    - Contenir au moins une lettre et un chiffre
 
 2. Le système de tokens doit :
+
    - Utiliser un access token de courte durée
    - Utiliser un refresh token de longue durée
    - Permettre le renouvellement des tokens
@@ -59,6 +70,7 @@ n'oubliez pas de créer un .env sur la base de exemple.env pour que votre applic
    - Être vérifiées à chaque requête
 
 ## Routes à implémenter
+
 ```
 // Sans ACL
 POST /register    : Inscription d'un nouvel utilisateur
@@ -74,6 +86,6 @@ DELETE /api/data/:id   : Suppression de données (pareil qu'au dessus)
 ```
 
 ## Bonus
+
 - Ajout d'éléments de sécurité pour eviter les params bombs, les requêtes malveillantes etc
 - Tests fonctionnels comme ceux présents en exemple
-
